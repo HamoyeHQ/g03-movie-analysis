@@ -1,0 +1,32 @@
+name: preprocess
+description: Performs the Movie success preprocessing.
+inputs:   #List of input specs. Each input spec is a map.
+- {name: Input 1 URI, type: GCSPath, description: 'Data for Input 1'}
+- {name: Output x URI template, type: GCSPath, description: 'Data for Input x'}
+- {name: Output y URI template, type: GCSPath, description: 'Data for Input y'} 
+- {name: Output preprocessing state URI template, type: GCSPath}
+outputs:
+    - name: Output x URI
+    type: GCSPath          # change to 'String'
+    - name: Output y URI
+    type: String    
+    - name: Output preprocessing state URI
+    type: String
+implementation:
+  container:
+    image: gcr.io/$PROJECT_ID/kubeflow/moviesuccess/preprocess:latest   # Name of a container image that you've pushed to a container repo.
+    # command is a list of strings (command-line arguments).
+    # The YAML language has two syntaxes for lists and you can use either of them.
+    # Here we use the "flow syntax" - comma-separated strings inside square brackets.
+    command: [
+      python3, /pipelines/component/src/preprocess.py, # Path of the program inside the container
+      --input1-path,                        {inputPath: Input 1 URI},        # Refers to the 'Input 1' input
+      --output-y-path,                      {inputValue: Output y URI template},   # Refers to the 'Output y' input
+      --output-x-path,                      {inputValue: Output x URI template},   # Refers to the 'Output x' input
+      --output-preprocessing-state-path,    {inputValue: Output preprocessing state URI template},
+
+
+      --output-y-path-file,                     {outputPath: Output y URI},  # Refers to the 'Output y' output 
+      --output-x-path-file,                     {outputPath: Output x URI},  # Refers to the 'Output x' output
+      --output-preprocessing-state-path-file,   {outputPath: Output preprocessing state URI},  
+    ]
